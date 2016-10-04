@@ -1,0 +1,67 @@
+---
+title: "Quantile Regression quasi stepwise model selection"
+author: "Andrea Spano"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+## Intro
+
+Do not forget to load libraries first
+
+```{r}
+require(quantreg)
+require(rqc)
+```
+
+Package `rqc` provides three functions:
+
+* rqc2: Returns comparison indicator between two models
+* rqci: Returns formula of best model with `i` variables 
+* rqcn: Returns a list of formulas with best models with number of variables ranging from i to n
+
+Notes: 
+* we may need to think about comparison of models with different number of variables
+* How to deal with interactions
+* Need references
+
+## Compare two models
+Returns comparison indicator between two models
+
+```{r}
+rqc2(
+formula = stack.loss~Air.Flow+Water.Temp+ Acid.Conc.,
+formula_base = stack.loss ~1,
+data = stackloss,
+tau = .5, method = 'fn')
+```
+
+## Compare models with `i`  variables
+
+Compute and compares models with `i` variables.
+
+Results of models with `i-1` variables are recursively saved for computation with `i` variables
+
+```{r}
+rqci( i = 2, formula = stack.loss~Air.Flow+Water.Temp+ Acid.Conc.,
+  formula_base = stack.loss ~1,
+ data = stackloss,
+ tau = .5, method = 'fn')
+```
+
+## Compare models built step by step 
+Compare models from base model `stack.loss~1` to  `stack.loss~Air.Flow+Acid.Conc.+Water.Temp`. 
+
+Model with `i` variables start from model with `i-1` variables. 
+
+```{r}
+rqcn( formula = stack.loss~Air.Flow+Acid.Conc.+Water.Temp,
+ formula_base = stack.loss ~1,
+ data = stackloss,
+ tau = .5, method = 'fn')
+```

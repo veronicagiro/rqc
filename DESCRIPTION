@@ -1,0 +1,16 @@
+Package: rqc
+Title: Model selection for quantile regression
+Version: 0.0.0.9000
+Authors@R: c(
+      person("Andrea", "Spano", email = "andrea.spano@quantide.com" , role = c('aut', 'cre')),
+      person("Maurizio", "Sanarico", email = "maurizio.sanarico@sdggroup.com", role = c('aut')))
+Description: Quasi stepwise model selection for quantile regression models.
+Depends:
+    R (>= 3.3.1)
+License: GPL
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 5.0.1
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr
