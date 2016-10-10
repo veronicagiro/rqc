@@ -18,7 +18,12 @@ rqci(i, formula, formula_base, data, tau, method)
 \item{method}{Model method for quantile regression}
 }
 \value{
-formula object corrensponding to the best model
+data frame of five colums:
+* i Integer:  number of variables tested
+* formula character: tested formula
+* formula_base character: base formula
+* score double: model perfornace indicator
+* formula_best integer: 0/1
 }
 \description{
 compute all models starting from formula base and adding all variables one by one

@@ -12,7 +12,7 @@
 
 <meta name="author" content="Andrea Spano" />
 
-<meta name="date" content="2016-10-04" />
+<meta name="date" content="2016-10-10" />
 
 <title>Quantile Regression quasi stepwise model selection</title>
 
@@ -70,66 +70,85 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Quantile Regression quasi stepwise model selection</h1>
 <h4 class="author"><em>Andrea Spano</em></h4>
-<h4 class="date"><em>2016-10-04</em></h4>
+<h4 class="date"><em>2016-10-10</em></h4>
 
 
 
 <div id="intro" class="section level2">
 <h2>Intro</h2>
 <p>Do not forget to load libraries first</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">require</span>(quantreg)</code></pre></div>
-<pre><code>## Loading required package: quantreg</code></pre>
-<pre><code>## Loading required package: SparseM</code></pre>
-<pre><code>## 
-## Attaching package: 'SparseM'</code></pre>
-<pre><code>## The following object is masked from 'package:base':
-## 
-##     backsolve</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">require</span>(rqc)</code></pre></div>
-<p>Package <code>rqc</code> provides three functions:</p>
-<ul>
-<li>rqc2: Returns comparison indicator between two models</li>
-<li>rqci: Returns formula of best model with <code>i</code> variables</li>
-<li>rqcn: Returns a list of formulas with best models with number of variables ranging from i to n</li>
-</ul>
-<p>Notes: * we may need to think about comparison of models with different number of variables * How to deal with interactions * Need references</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">require</span>(quantreg)
+<span class="kw">require</span>(rqc)</code></pre></div>
+<p>Package <code>rqc</code> exposes a single function: <code>rqcn</code> that returns a data frame of formulas</p>
 </div>
-<div id="compare-two-models" class="section level2">
-<h2>Compare two models</h2>
-<p>Returns comparison indicator between two models</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">rqc2</span>(
-<span class="dt">formula =</span> stack.loss~Air.Flow+Water.Temp+<span class="st"> </span>Acid.Conc.,
+<div id="model-comparison" class="section level2">
+<h2>Model comparison</h2>
+<p>Function <code>rqcn()</code> compares models from <code>base_formula</code> to <code>formula</code>. If argument <code>n_vars</code> is given, models building stops at <code>n_vars</code>. Clearly, <code>n_vars</code> cannot be larger than the number of variables included in the rhs of <code>formula</code>.</p>
+<p>The procedures works as followwing:</p>
+<ol style="list-style-type: decimal">
+<li><p>Variables are added one by one within each model degree.</p></li>
+<li><p>Within model degree one best model is chosen according to <code>kpi = 1-(fm$rho/fm_base$rho)</code>.</p></li>
+<li><p>Base model formula is chosen as base formula for next degree model</p></li>
+</ol>
+<p>Example 1: all models from NULL to three variables</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">rqcn</span>( <span class="dt">formula =</span> stack.loss~Air.Flow+Water.Temp+<span class="st"> </span>Acid.Conc.,
 <span class="dt">formula_base =</span> stack.loss ~<span class="dv">1</span>,
 <span class="dt">data =</span> stackloss,
 <span class="dt">tau =</span> .<span class="dv">5</span>, <span class="dt">method =</span> <span class="st">'fn'</span>)</code></pre></div>
-<pre><code>## [1] 0.7097851</code></pre>
-</div>
-<div id="compare-models-with-i-variables" class="section level2">
-<h2>Compare models with <code>i</code> variables</h2>
-<p>Compute and compares models with <code>i</code> variables.</p>
-<p>Results of models with <code>i-1</code> variables are recursively saved for computation with <code>i</code> variables</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">rqci</span>( <span class="dt">i =</span> <span class="dv">2</span>, <span class="dt">formula =</span> stack.loss~Air.Flow+Water.Temp+<span class="st"> </span>Acid.Conc.,
-  <span class="dt">formula_base =</span> stack.loss ~<span class="dv">1</span>,
- <span class="dt">data =</span> stackloss,
- <span class="dt">tau =</span> .<span class="dv">5</span>, <span class="dt">method =</span> <span class="st">'fn'</span>)</code></pre></div>
-<pre><code>## [1] &quot;stack.loss~Air.Flow+Water.Temp&quot;</code></pre>
-</div>
-<div id="compare-models-built-step-by-step" class="section level2">
-<h2>Compare models built step by step</h2>
-<p>Compare models from base model <code>stack.loss~1</code> to <code>stack.loss~Air.Flow+Acid.Conc.+Water.Temp</code>.</p>
-<p>Model with <code>i</code> variables start from model with <code>i-1</code> variables.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">rqcn</span>( <span class="dt">formula =</span> stack.loss~Air.Flow+Acid.Conc.+Water.Temp,
- <span class="dt">formula_base =</span> stack.loss ~<span class="dv">1</span>,
- <span class="dt">data =</span> stackloss,
- <span class="dt">tau =</span> .<span class="dv">5</span>, <span class="dt">method =</span> <span class="st">'fn'</span>)</code></pre></div>
-<pre><code>## [[1]]
-## [1] &quot;stack.loss~Air.Flow&quot;
-## 
-## [[2]]
-## [1] &quot;stack.loss~Air.Flow+Water.Temp&quot;
-## 
-## [[3]]
-## [1] &quot;stack.loss~Air.Flow+Acid.Conc.+Water.Temp&quot;</code></pre>
+<pre><code>##                                       formula
+## 1                       stack.loss~1+Air.Flow
+## 2                     stack.loss~1+Water.Temp
+## 3                     stack.loss~1+Acid.Conc.
+## 4            stack.loss~Air.Flow+1+Water.Temp
+## 5            stack.loss~Air.Flow+1+Acid.Conc.
+## 6 stack.loss~Air.Flow+Water.Temp+1+Acid.Conc.
+##                             formula_base      score n_var formula_best
+## 1                         stack.loss ~ 1 0.64137931     1            1
+## 2                         stack.loss ~ 1 0.42364532     1            0
+## 3                         stack.loss ~ 1 0.10541872     1            0
+## 4              stack.loss ~ 1 + Air.Flow 0.15973945     2            1
+## 5              stack.loss ~ 1 + Air.Flow 0.02132107     2            0
+## 6 stack.loss ~ Air.Flow + 1 + Water.Temp 0.03690222     3            1</code></pre>
+<p>Example 2 : all models from NULL to two variables given a three variables formula</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">rqcn</span>( <span class="dt">formula =</span> stack.loss~Air.Flow+Water.Temp+<span class="st"> </span>Acid.Conc.,
+<span class="dt">formula_base =</span> stack.loss ~<span class="dv">1</span>,
+<span class="dt">n_vars =</span> <span class="dv">2</span>,
+<span class="dt">data =</span> stackloss,
+<span class="dt">tau =</span> .<span class="dv">5</span>, <span class="dt">method =</span> <span class="st">'fn'</span>)</code></pre></div>
+<pre><code>##                            formula              formula_base      score
+## 1            stack.loss~1+Air.Flow            stack.loss ~ 1 0.64137931
+## 2          stack.loss~1+Water.Temp            stack.loss ~ 1 0.42364532
+## 3          stack.loss~1+Acid.Conc.            stack.loss ~ 1 0.10541872
+## 4 stack.loss~Air.Flow+1+Water.Temp stack.loss ~ 1 + Air.Flow 0.15973945
+## 5 stack.loss~Air.Flow+1+Acid.Conc. stack.loss ~ 1 + Air.Flow 0.02132107
+##   n_var formula_best
+## 1     1            1
+## 2     1            0
+## 3     1            0
+## 4     2            1
+## 5     2            0</code></pre>
+<p>Example 3 : all models from NULL to one variables given a three variables formula</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">rqcn</span>( <span class="dt">formula =</span> stack.loss~Air.Flow+Water.Temp+<span class="st"> </span>Acid.Conc.,
+<span class="dt">formula_base =</span> stack.loss ~<span class="dv">1</span>,
+<span class="dt">n_vars =</span> <span class="dv">1</span>,
+<span class="dt">data =</span> stackloss,
+<span class="dt">tau =</span> .<span class="dv">5</span>, <span class="dt">method =</span> <span class="st">'fn'</span>)</code></pre></div>
+<pre><code>##                   formula   formula_base     score n_var formula_best
+## 1   stack.loss~1+Air.Flow stack.loss ~ 1 0.6413793     1            1
+## 2 stack.loss~1+Water.Temp stack.loss ~ 1 0.4236453     1            0
+## 3 stack.loss~1+Acid.Conc. stack.loss ~ 1 0.1054187     1            0</code></pre>
+<p>Example 4 : all models from first degree to two variables given a three variables formula</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">rqcn</span>( <span class="dt">formula =</span> stack.loss~Air.Flow+Water.Temp+<span class="st"> </span>Acid.Conc.,
+<span class="dt">formula_base =</span> stack.loss ~Air.Flow,
+<span class="dt">n_vars =</span> <span class="dv">2</span>,
+<span class="dt">data =</span> stackloss,
+<span class="dt">tau =</span> .<span class="dv">5</span>, <span class="dt">method =</span> <span class="st">'fn'</span>)</code></pre></div>
+<pre><code>##                            formula          formula_base      score n_var
+## 1 stack.loss~Air.Flow+1+Water.Temp stack.loss ~ Air.Flow 0.15973945     2
+## 2 stack.loss~Air.Flow+1+Acid.Conc. stack.loss ~ Air.Flow 0.02132107     2
+##   formula_best
+## 1            1
+## 2            0</code></pre>
 </div>
 
 

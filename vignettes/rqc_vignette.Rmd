@@ -19,49 +19,52 @@ require(quantreg)
 require(rqc)
 ```
 
-Package `rqc` provides three functions:
+Package `rqc` exposes a single function: `rqcn` that returns a data frame of formulas 
 
-* rqc2: Returns comparison indicator between two models
-* rqci: Returns formula of best model with `i` variables 
-* rqcn: Returns a list of formulas with best models with number of variables ranging from i to n
+## Model comparison 
 
-Notes: 
-* we may need to think about comparison of models with different number of variables
-* How to deal with interactions
-* Need references
+Function `rqcn()` compares models from `base_formula` to `formula`. If argument `n_vars` is given, models building stops at `n_vars`. Clearly, `n_vars` cannot be larger than the number of variables included in the rhs of `formula`. 
 
-## Compare two models
-Returns comparison indicator between two models
+The procedures works as followwing:
 
+1. Variables are added one by one within each model degree. 
+
+2. Within model degree one best model is chosen according to `kpi = 1-(fm$rho/fm_base$rho)`. 
+
+3. Base model formula is chosen as base formula for next degree model
+
+
+Example 1: all models from NULL to three variables 
 ```{r}
-rqc2(
-formula = stack.loss~Air.Flow+Water.Temp+ Acid.Conc.,
+rqcn( formula = stack.loss~Air.Flow+Water.Temp+ Acid.Conc.,
 formula_base = stack.loss ~1,
 data = stackloss,
 tau = .5, method = 'fn')
 ```
 
-## Compare models with `i`  variables
-
-Compute and compares models with `i` variables.
-
-Results of models with `i-1` variables are recursively saved for computation with `i` variables
-
+Example 2 : all models from NULL to two variables given a three variables formula 
 ```{r}
-rqci( i = 2, formula = stack.loss~Air.Flow+Water.Temp+ Acid.Conc.,
-  formula_base = stack.loss ~1,
- data = stackloss,
- tau = .5, method = 'fn')
+rqcn( formula = stack.loss~Air.Flow+Water.Temp+ Acid.Conc.,
+formula_base = stack.loss ~1,
+n_vars = 2,
+data = stackloss,
+tau = .5, method = 'fn')
 ```
 
-## Compare models built step by step 
-Compare models from base model `stack.loss~1` to  `stack.loss~Air.Flow+Acid.Conc.+Water.Temp`. 
-
-Model with `i` variables start from model with `i-1` variables. 
-
+Example 3 : all models from NULL to one variables given a three variables formula 
 ```{r}
-rqcn( formula = stack.loss~Air.Flow+Acid.Conc.+Water.Temp,
- formula_base = stack.loss ~1,
- data = stackloss,
- tau = .5, method = 'fn')
+rqcn( formula = stack.loss~Air.Flow+Water.Temp+ Acid.Conc.,
+formula_base = stack.loss ~1,
+n_vars = 1,
+data = stackloss,
+tau = .5, method = 'fn')
+```
+
+Example 4 : all models from first degree to two variables given a three variables formula 
+```{r}
+rqcn( formula = stack.loss~Air.Flow+Water.Temp+ Acid.Conc.,
+formula_base = stack.loss ~Air.Flow,
+n_vars = 2,
+data = stackloss,
+tau = .5, method = 'fn')
 ```

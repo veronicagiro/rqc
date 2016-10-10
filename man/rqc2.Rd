@@ -18,7 +18,7 @@ rqc2(formula, formula_base, data, tau, method)
 \item{Model}{quantile for quantile regression.}
 }
 \value{
-double, model comparison indicator
+double: model performance indicator
 }
 \description{
 compute model according to  formula and model_base according to formula_base.

@@ -1,29 +1,4 @@
 
-# library(quantreg)
-#
-# fm0 <- rq(train_total_gross_value ~ 1, data = df, tau=tau[3], method='fn')
-#
-# fm1 <- rq(train_total_gross_value ~ train_purchases_count, data = df, tau=tau[3], method='fn')
-# fm2 <- rq(train_total_gross_value ~ train_purchase_max, data = df, tau=tau[3], method='fn')
-# fm3 <- rq(train_total_gross_value ~ train_purchase_min , data = df, tau=tau[3], method='fn')
-#
-# rho <- function(u,tau=tau[3])u*(tau - (u < 0))
-#
-# R10 <- 1- fm1$rho/fm0$rho
-# R20 <- 1 - fm2$rho/fm0$rho
-# R30 <- 1 - fm3$rho/fm0$rho
-
-# Ciascun test valuta in questo caso il merito di una variabile rispetto al modello nullo (fm0)
-# usando la mediana come quantile.
-
-#I risultati vengono poi rankizzati. E prendendo il modello con la variabile più signigicativa come
-#modello di base si aggiunge una variabile alla volta e si vede qual'è
-#il modello a due var più sginificativo e così via.
-########################
-#rm(list = ls())
-#require(quantreg)
-#stackloss$noise <- rnorm(nrow(stackloss), 4, 1)
-
 #############################################
 #' @title Compare two quantile regression (rq)  models
 #' @description
@@ -32,18 +7,17 @@
 #' @param formula Formula for the full model
 #' @param formula_base Formula for teh base model
 #' @param data Model data frame
-#' @param Model quantile for quantile regression.
+#' @param tau quantile for quantile regression.
 #' @param method Model method for quantile regression
-#' @return double, model comparison indicator
+#' @return double: model performance indicator
 #' @importFrom  quantreg rq
 #' @examples
 #' rqc2(
-#'  formula = stack.loss~Air.Flow+Water.Temp+ Acid.Conc.+noise,
+#'  formula = stack.loss~Air.Flow+Water.Temp+ Acid.Conc.,
 #'  formula_base = stack.loss ~1,
 #'  data = stackloss,
 #'  tau = .5, method = 'fn')
-#' @export
-#rqc1
+#' #@export
 rqc2 <- function(formula, formula_base, data , tau, method) {
   fm <- rq(formula, data = data , tau = tau, method = method)
   fm_base <- rq(formula_base, data = data , tau = tau, method = method)
@@ -59,15 +33,33 @@ rqc2 <- function(formula, formula_base, data , tau, method) {
 #' @param data Model data frame
 #' @param tau a quantile for quantile regression
 #' @param method Model method for quantile regression
-#' @return formula object corrensponding to the best model
+#' @return data frame of five colums:
+#' * i Integer:  number of variables tested
+#' * formula character: tested formula
+#' * formula_base character: base formula
+#' * score double: model perfornace indicator
+#' * formula_best integer: 0/1
 #' @importFrom  quantreg rq
 #' @examples
-#'  rqci( i = 2, formula = stack.loss~Air.Flow+Water.Temp+ Acid.Conc.,
-#'      formula_base = stack.loss ~1,
-#'      data = stackloss,
-#'      tau = .5, method = 'fn')
-#' @export
-rqci <- function(i , formula, formula_base , data ,  tau , method) {
+#' rqci(
+#'  formula = stack.loss~Air.Flow+Water.Temp+ Acid.Conc.,
+#'  formula_base = stack.loss ~1,
+#'  data = stackloss,
+#'  tau = .5, method = 'fn')
+#' ## i = 2
+#' rqci(
+#'  formula = stack.loss~Air.Flow+Water.Temp+ Acid.Conc.,
+#'  formula_base = stack.loss ~Air.Flow,
+#'  data = stackloss,
+#'  tau = .5, method = 'fn')
+#' ## i = 3
+#' rqci(
+#'  formula = stack.loss~Air.Flow+Water.Temp+ Acid.Conc.,
+#'  formula_base = stack.loss~Water.Temp,
+#'  data = stackloss,
+#'  tau = .5, method = 'fn')
+#'  #@export
+rqci <- function(formula, formula_base , data ,  tau , method) {
 
   # response variable
   response <- all.vars(formula)[1]
@@ -77,19 +69,15 @@ rqci <- function(i , formula, formula_base , data ,  tau , method) {
 
   # all x in formula base
   Xsb <- all.vars(formula_base)[-1]
+  n_Xsb <- length(Xsb)
 
   # all x in formula not in formula base
   Xs <- Xs[!(Xs %in% Xsb)]
 
-  # all combination of i as a matrix
-  Xs_comb_matrix <- combn(Xs, i)
+  # paste all base vars together with a #
+  Xsb <- paste(c( Xsb, "1"), collapse = "+")
 
-  # all combination of i as a list
-  # must be a simpler way :-)
-  Xs_comb_list <- lapply(seq_len(ncol(Xs_comb_matrix)), function(i, x) x[,i] , Xs_comb_matrix)
-
-  # right hand side of the formulas
-  rs_formula_list <- unlist(lapply(Xs_comb_list, paste , collapse = "+"))
+  rs_formula_list <- apply(expand.grid(Xsb, Xs), 1, paste, collapse = "+")
 
   # list of formulas
   formula_list <- unlist(lapply(response, paste, rs_formula_list, sep = "~"))
@@ -102,12 +90,19 @@ rqci <- function(i , formula, formula_base , data ,  tau , method) {
   #best formula
   formula_best <- formula_list[score == max(score)]
 
+  out <- data.frame(
+                    formula = as.character(formula_list),
+                    formula_base = Reduce(paste, deparse(formula_base)),
+                    score = score,
+                    n_var = n_Xsb+1,
+                    formula_best = ifelse(score == max(score), 1, 0),
+                    stringsAsFactors = FALSE
+
+                    )
   # return
-  return(formula_best)
-
+  return(out)
 }
-
-##############################
+#############################
 #' @title Compare all quantile regression (rq) with i=1:n variables
 #' @description
 #' Starting from formula base  with i terms  adds variables one by one, computes models
@@ -120,24 +115,68 @@ rqci <- function(i , formula, formula_base , data ,  tau , method) {
 #' @param method Model method for quantile regression
 #' @return formula object corrensponding to the best model
 #' @importFrom  quantreg rq
+#' @importFrom dplyr sample_n
 #' @examples
-#'  rqcn( formula = stack.loss~Air.Flow+Water.Temp+ Acid.Conc.,
-#'      formula_base = stack.loss ~1,
-#'      data = stackloss,
-#'      tau = .5, method = 'fn')
+#' # Example 1
+#' rqcn( formula = stack.loss~Air.Flow+Water.Temp+ Acid.Conc.,
+#' formula_base = stack.loss ~1,
+#' data = stackloss,
+#' tau = .5, method = 'fn')
+#' # Example 2
+#' rqcn( formula = stack.loss~Air.Flow+Water.Temp+ Acid.Conc.,
+#' formula_base = stack.loss ~1,
+#' n_vars = 2,
+#' data = stackloss,
+#' tau = .5, method = 'fn')
 #' @export
-rqcn <- function(formula, formula_base, data, tau , method){
+rqcn <- function(formula, formula_base, data, tau , method, n_vars = NULL, n_sample = -1){
 
   Xs <- all.vars(formula)[-1]
-  n_vars <- length(Xs)
-  out <- list()
-  for ( i in seq_len(n_vars)){
-    formula_best <- rqci( i = i,
-                    formula = formula, formula_base = formula_base, data = data, tau = tau, method = method)
-    out[i] <- formula_best
-    formula_base <- formula_best
+
+  # take into account intercept
+  Xsb <- all.vars(formula_base)[-1]
+  if (length(Xsb == 0)) {
+    Xsb <- 1
   }
 
-out
+  # start from
+  n_start <- length(Xsb)
+
+  # if n_vars is not given
+  if (is.null(n_vars)){
+    n_vars <- length(Xs)
+  } else {
+
+  # check n_vars consistency
+    if (n_vars > length(Xs)){
+      stop("n_vars cannot be larger than number of variables in teh rhs of formula")
+    }
+  }
+
+  # check n_start vs n_vars consistency
+  if (n_start > n_vars ){
+    stop("n_start cannot be larger n_vars")
+  }
+
+  if(n_sample > 0) {
+    data <- sample_n(data, n_sample)
+  }
+
+
+  n_vars <- n_vars-n_start
+
+  out <- list()
+  for ( i in 1:n_vars){
+    df_out <- rqci(
+                    formula = formula, formula_base = formula_base, data = data, tau = tau, method = method)
+
+    out[[i]] <- df_out
+    formula_base <- as.formula(df_out$formula[df_out$formula_best == 1])
+    }
+
+  # Reduce
+  out <- Reduce(rbind , out)
+
+  return(out)
 }
 #######################################
