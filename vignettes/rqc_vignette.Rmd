@@ -55,7 +55,7 @@ Example 3 : all models from NULL to one variables given a three variables formul
 ```{r}
 rqcn( formula = stack.loss~Air.Flow+Water.Temp+ Acid.Conc.,
 formula_base = stack.loss ~1,
-n_vars = 1,
+n_vars = 2,
 data = stackloss,
 tau = .5, method = 'fn')
 ```
