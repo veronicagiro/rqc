@@ -17,7 +17,7 @@
 #'  formula_base = stack.loss ~1,
 #'  data = stackloss,
 #'  tau = .5, method = 'fn')
-#' #@export
+#' @export
 rqc2 <- function(formula, formula_base, data , tau, method) {
   fm <- rq(formula, data = data , tau = tau, method = method)
   fm_base <- rq(formula_base, data = data , tau = tau, method = method)
@@ -58,7 +58,7 @@ rqc2 <- function(formula, formula_base, data , tau, method) {
 #'  formula_base = stack.loss~Water.Temp,
 #'  data = stackloss,
 #'  tau = .5, method = 'fn')
-#'  #@export
+#'  @export
 rqci <- function(formula, formula_base , data ,  tau , method) {
 
   # response variable
