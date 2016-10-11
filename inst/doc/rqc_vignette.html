@@ -12,7 +12,7 @@
 
 <meta name="author" content="Andrea Spano" />
 
-<meta name="date" content="2016-10-10" />
+<meta name="date" content="2016-10-11" />
 
 <title>Quantile Regression quasi stepwise model selection</title>
 
@@ -70,15 +70,23 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Quantile Regression quasi stepwise model selection</h1>
 <h4 class="author"><em>Andrea Spano</em></h4>
-<h4 class="date"><em>2016-10-10</em></h4>
+<h4 class="date"><em>2016-10-11</em></h4>
 
 
 
 <div id="intro" class="section level2">
 <h2>Intro</h2>
 <p>Do not forget to load libraries first</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">require</span>(quantreg)
-<span class="kw">require</span>(rqc)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">require</span>(quantreg)</code></pre></div>
+<pre><code>## Loading required package: quantreg</code></pre>
+<pre><code>## Loading required package: SparseM</code></pre>
+<pre><code>## 
+## Attaching package: 'SparseM'</code></pre>
+<pre><code>## The following object is masked from 'package:base':
+## 
+##     backsolve</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">require</span>(rqc)</code></pre></div>
+<pre><code>## Loading required package: rqc</code></pre>
 <p>Package <code>rqc</code> exposes a single function: <code>rqcn</code> that returns a data frame of formulas</p>
 </div>
 <div id="model-comparison" class="section level2">
