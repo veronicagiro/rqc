@@ -4,7 +4,7 @@
 \alias{rqc2}
 \title{Compare two quantile regression (rq)  models}
 \usage{
-rqc2(formula, formula_base, data, tau, method)
+rqc2(formula, formula_base, data, tau, method, ...)
 }
 \arguments{
 \item{formula}{Formula for the full model}
@@ -13,12 +13,13 @@ rqc2(formula, formula_base, data, tau, method)
 
 \item{data}{Model data frame}
 
-\item{method}{Model method for quantile regression}
+\item{tau}{quantile for quantile regression.}
 
-\item{Model}{quantile for quantile regression.}
+\item{method}{Model method for quantile regression}
 }
 \value{
 double: model performance indicator
+#@importFrom  quantreg rq
 }
 \description{
 compute model according to  formula and model_base according to formula_base.
@@ -26,7 +27,7 @@ Return a between models comparison statistics.
 }
 \examples{
 rqc2(
- formula = stack.loss~Air.Flow+Water.Temp+ Acid.Conc.+noise,
+ formula = stack.loss~Air.Flow+Water.Temp+ Acid.Conc.,
  formula_base = stack.loss ~1,
  data = stackloss,
  tau = .5, method = 'fn')

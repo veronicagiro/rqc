@@ -1,4 +1,17 @@
-
+#############################################
+#' @title Compare two quantile regression (rq)  models
+#' @description
+#' compute 1-rho/rho_base where
+#' rho_base = The value of objective function at the solution for model fm_base
+#' rho = The value of objective function at the solution for model fm
+#' @param rho_base double
+#' @param rho double
+#' @return double: between models comparison indicator
+#' #@examples
+#' @export
+rqc1 <- function(fm, fm_base) {
+  1-(fm$rho/fm$rho_base)
+}
 #############################################
 #' @title Compare two quantile regression (rq)  models
 #' @description
@@ -10,7 +23,7 @@
 #' @param tau quantile for quantile regression.
 #' @param method Model method for quantile regression
 #' @return double: model performance indicator
-#' @importFrom  quantreg rq
+#' #@importFrom  quantreg rq
 #' @examples
 #' rqc2(
 #'  formula = stack.loss~Air.Flow+Water.Temp+ Acid.Conc.,
@@ -18,10 +31,11 @@
 #'  data = stackloss,
 #'  tau = .5, method = 'fn')
 #' @export
-rqc2 <- function(formula, formula_base, data , tau, method) {
-  fm <- rq(formula, data = data , tau = tau, method = method)
-  fm_base <- rq(formula_base, data = data , tau = tau, method = method)
-  1-(fm$rho/fm_base$rho)
+rqc2 <- function(formula, formula_base, data , tau, method, ...) {
+  fm <- rq(formula, data = data , tau = tau, method = method, ...)
+  fm_base <- rq(formula_base, data = data , tau = tau, method = method, ...)
+  out <- list(fm = fm,  fm_base = fm_base)
+  return(out)
 }
 ###########################
 #' @title Compare all quantile regression (rq) with i variables
@@ -33,8 +47,8 @@ rqc2 <- function(formula, formula_base, data , tau, method) {
 #' @param data Model data frame
 #' @param tau a quantile for quantile regression
 #' @param method Model method for quantile regression
+#' @param ... additional parameters for function `qr`
 #' @return data frame of five colums:
-#' * i Integer:  number of variables tested
 #' * formula character: tested formula
 #' * formula_base character: base formula
 #' * score double: model perfornace indicator
@@ -59,7 +73,7 @@ rqc2 <- function(formula, formula_base, data , tau, method) {
 #'  data = stackloss,
 #'  tau = .5, method = 'fn')
 #'  @export
-rqci <- function(formula, formula_base , data ,  tau , method) {
+rqci <- function(formula, formula_base , data ,  tau , method, ...) {
 
   # response variable
   response <- all.vars(formula)[1]
@@ -81,6 +95,11 @@ rqci <- function(formula, formula_base , data ,  tau , method) {
 
   # list of formulas
   formula_list <- unlist(lapply(response, paste, rs_formula_list, sep = "~"))
+
+  # list of models
+  model_list <- lapply(formula_list, rq, data=data , tau=tau , method=method, ...)
+
+
 
   # models and scores for each formula
   score <- unlist(lapply(formula_list,

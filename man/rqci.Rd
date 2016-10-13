@@ -4,7 +4,7 @@
 \alias{rqci}
 \title{Compare all quantile regression (rq) with i variables}
 \usage{
-rqci(i, formula, formula_base, data, tau, method)
+rqci(formula, formula_base, data, tau, method, ...)
 }
 \arguments{
 \item{formula}{Formula for the full model}
@@ -16,10 +16,11 @@ rqci(i, formula, formula_base, data, tau, method)
 \item{tau}{a quantile for quantile regression}
 
 \item{method}{Model method for quantile regression}
+
+\item{...}{additional parameters for function `qr`}
 }
 \value{
 data frame of five colums:
-* i Integer:  number of variables tested
 * formula character: tested formula
 * formula_base character: base formula
 * score double: model perfornace indicator
@@ -30,9 +31,23 @@ compute all models starting from formula base and adding all variables one by on
 Return a between models comparison statistics.
 }
 \examples{
- rqci( i = 2, formula = stack.loss~Air.Flow+Water.Temp+ Acid.Conc.,
-     formula_base = stack.loss ~1,
-     data = stackloss,
-     tau = .5, method = 'fn')
+rqci(
+ formula = stack.loss~Air.Flow+Water.Temp+ Acid.Conc.,
+ formula_base = stack.loss ~1,
+ data = stackloss,
+ tau = .5, method = 'fn')
+## i = 2
+rqci(
+ formula = stack.loss~Air.Flow+Water.Temp+ Acid.Conc.,
+ formula_base = stack.loss ~Air.Flow,
+ data = stackloss,
+ tau = .5, method = 'fn')
+## i = 3
+rqci(
+ formula = stack.loss~Air.Flow+Water.Temp+ Acid.Conc.,
+ formula_base = stack.loss~Water.Temp,
+ data = stackloss,
+ tau = .5, method = 'fn')
+ @export
 }
 

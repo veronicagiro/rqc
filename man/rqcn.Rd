@@ -4,7 +4,7 @@
 \alias{rqcn}
 \title{Compare all quantile regression (rq) with i=1:n variables}
 \usage{
-rqcn(formula, formula_base, data, tau, method)
+rqcn(formula, formula_base, data, tau, method, n_vars = NULL, n_sample = -1)
 }
 \arguments{
 \item{formula}{Formula for the full model}
@@ -26,9 +26,16 @@ and returns the formulae for all best models with number of variables ranging
 between i and n with n being the number of variables in  formula
 }
 \examples{
- rqcn( formula = stack.loss~Air.Flow+Water.Temp+ Acid.Conc.,
-     formula_base = stack.loss ~1,
-     data = stackloss,
-     tau = .5, method = 'fn')
+# Example 1
+rqcn( formula = stack.loss~Air.Flow+Water.Temp+ Acid.Conc.,
+formula_base = stack.loss ~1,
+data = stackloss,
+tau = .5, method = 'fn')
+# Example 2
+rqcn( formula = stack.loss~Air.Flow+Water.Temp+ Acid.Conc.,
+formula_base = stack.loss ~1,
+n_vars = 2,
+data = stackloss,
+tau = .5, method = 'fn')
 }
 
