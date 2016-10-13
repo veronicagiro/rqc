@@ -1,2 +1,2 @@
 # rqc
-Quantiel regression quasi step wise model selection
+Quantile regression quasi step wise model selection
