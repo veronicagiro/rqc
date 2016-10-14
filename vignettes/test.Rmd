@@ -1,0 +1,101 @@
+---
+title: "test"
+author: "Andrea"
+date: "October 13, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+require(quantreg)
+require(rqc)
+```
+
+Build model list from formula
+
+```{r}
+fm_b <- rq(stack.loss~1, data = stackloss, tau = .5, method = "fn")
+mod_lst <- make_model_list (formula =  stack.loss~Air.Flow+Water.Temp+ Acid.Conc.,
+                              fm_base = fm_b,
+                              data = stackloss, tau = .5, method = "fn", mc.cores = 1)
+
+                 
+```
+
+Formulae in models
+
+```{r}
+make_formula_list(mod_lst)
+
+```
+
+select best model in comparison with a base model 
+
+```{r}
+fm_best <- best_model (model_list = mod_lst, fm_base = fm_b)
+frm(fm_best)
+```
+
+
+
+```{r}
+result <- make_best_model_list (
+  formula = stack.loss~Air.Flow+Water.Temp+ Acid.Conc.,
+  formula_base = stack.loss~1, 
+  data = stackloss, 
+  n_var = 3,
+  tau = .5, method = "fn",
+  mc.cores = 1)
+```  
+
+
+```{r}
+state_x77 <-  as.data.frame(state.x77)  
+names(state_x77) <- c("population","income","illiteracy","life_exp","murder","hs_grad","frost","area" )
+
+
+result <- make_best_model_list (
+  formula = life_exp~population+income+illiteracy+murder+hs_grad+frost+area,
+  formula_base = life_exp~1, 
+  formula_null = life_exp~1, 
+  data = state_x77, 
+  n_var = 5,
+  tau = .5, method = "fn",
+  mc.cores = 1)
+```
+
+
+```{r}
+unlist(multi_ratio_rho (model_list = result[[1]]$fm_all, fm_base = rq(life_exp~1, data = state_x77, tau = .5, method = "fn")))
+
+best_mod <- best_model(result[[1]]$fm_all, fm_base = rq(life_exp~1, data = state_x77, tau = .5, method = "fn"))
+make_formula_list (result[[1]]$fm_all)
+debugonce(best_model)
+
+  
+summary_single_rqc (i = 1, rqc = result)
+  
+unlist(multi_ratio_rho (model_list = result[[2]]$fm_all, fm_base = rq(life_exp ~ 1 + murder, data = state_x77, tau = .5, method = "fn")))
+summary_single_rqc (i = 2, rqc = result)
+summary_single_rqc (i = 3, rqc = result)
+
+
+summary_single_rqc (i = 1, rqc = result, exclude_var = "formula_best")
+summary_single_rqc (i = 1, rqc = result, exclude_var = c("formula_best", "formula_null" ))
+
+summary_single_rqc (i = 4, rqc = result, exclude_var = "formula_best", best_only = T)
+
+```
+
+```{r}
+summary_all_rqc (rqc = result, exclude_var = c("formula_best", "formula_null"))
+summary_all_rqc (rqc = result, exclude_var = c("formula_best", "best_model", "formula_null"), best_only = T, digits = 4)
+summary_all_rqc (rqc = result, exclude_var = c("formula_best", "best_model", "formula_null"), best_only = T, digits = 4)
+```
+
+
+
+
