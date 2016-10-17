@@ -111,10 +111,17 @@ make_model_list <- function(formula, fm_base , data, mc.cores , ...){
   # all x in formula not in formula base
   Xs <- Xs[!(Xs %in% Xsb)]
 
+
   # paste all base vars together with a #
   Xsb <- paste(c( Xsb, "1"), collapse = "+")
 
-  rs_formula_list <- apply(expand.grid(Xsb, Xs), 1, paste, collapse = "+")
+
+  #make formula list
+  if (length(Xs) > 0 ) {
+    rs_formula_list <- apply(expand.grid(Xsb, Xs), 1, paste, collapse = "+")
+  } else {
+    rs_formula_list <- list(paste(Xsb, collapse = "+"))
+  }
 
   # list of formulas
   formula_list <- unlist(lapply(response, paste, rs_formula_list, sep = "~"))
@@ -156,7 +163,7 @@ make_best_model_list <- function(formula, formula_base, formula_null, data , n_r
     Xsb <- f_rhs_var(formula_base)
 
     # start from
-    #n_start <- length(Xsb)
+    n_start <- f_rhs_n(formula_base)
 
     # if n_var is not given
     if (is.null(n_var)){
@@ -191,11 +198,11 @@ make_best_model_list <- function(formula, formula_base, formula_null, data , n_r
   # empty list
   out <- list()
 
-  # initialize
+  # initialize list index
   i <- 1
 
   # looping
-  while(i < n_var){
+  while(n_start < n_var){
 
     fm_best <- best_model (model_list = fm_all, fm_base = fm_base)
 
@@ -212,8 +219,12 @@ make_best_model_list <- function(formula, formula_base, formula_null, data , n_r
                                ...)
 
     #increase
+    n_start <- n_start+1
     i <- i+1
   }
+
+  # set names
+  #out_names <- unlist(lapply(lapply(fm_all, frm), f_rhs_n))
 
   #return
   return(out)
@@ -233,7 +244,7 @@ summary_single_rqc <- function(i, rqc, best_only = F, exclude_var = NULL , digit
   out <- data.frame(
     formula_list = unlist(lapply(fm_all, frm_char)) #(result[[1]]$fm_all)
     ,formula_best = frm_char(fm_best)
-    ,n_var = unlist(lapply(lapply(fm_all, frm), f_rhs_n))
+    ,n_model_var = unlist(lapply(lapply(fm_all, frm), f_rhs_n))
     ,formula_base = frm_char(fm_base)
     ,ratio_rho_base = round(unlist(lapply(fm_all, ratio_rho, fm_base)), digits = digits)
     ,formula_null = frm_char(fm_null)
@@ -261,7 +272,7 @@ summary_single_rqc <- function(i, rqc, best_only = F, exclude_var = NULL , digit
 #' @export
 summary_all_rqc <- function(rqc, ...){
   n <- length(rqc)
-  out <- lapply(seq_len(4), summary_single_rqc, rqc, ...)
+  out <- lapply(seq_len(n), summary_single_rqc, rqc, ...)
   out <- Reduce(rbind, out)
   return(out)
 

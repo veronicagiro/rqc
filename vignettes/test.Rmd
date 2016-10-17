@@ -1,18 +1,28 @@
 ---
-title: "test"
-author: "Andrea"
-date: "October 13, 2016"
-output: html_document
+title: "Quantile Regression quasi stepwise model selection"
+author: "Andrea Spano"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+
+## Intro
+
+Do not forget to load libraries first
 
 ```{r}
 require(quantreg)
 require(rqc)
+require(ggplot2)
+require(gridExtra)
 ```
+
+
+## Stackloss Example
 
 Build model list from formula
 
@@ -25,76 +35,119 @@ mod_lst <- make_model_list (formula =  stack.loss~Air.Flow+Water.Temp+ Acid.Conc
                  
 ```
 
-Formulae in models
+Get formulae from models
 
 ```{r}
 make_formula_list(mod_lst)
-
 ```
 
 select best model in comparison with a base model 
 
 ```{r}
 fm_best <- best_model (model_list = mod_lst, fm_base = fm_b)
+fm_best
+```
+
+Get the formula of a single model 
+
+```{r}
 frm(fm_best)
 ```
 
 
+Fit all models up to three variables starting from a univariate model
 
 ```{r}
-result <- make_best_model_list (
+stackloss_model_list <- make_best_model_list (
   formula = stack.loss~Air.Flow+Water.Temp+ Acid.Conc.,
-  formula_base = stack.loss~1, 
+  formula_base = stack.loss~Air.Flow, 
+  formula_null = stack.loss~1,
   data = stackloss, 
-  n_var = 3,
   tau = .5, method = "fn",
   mc.cores = 1)
 ```  
 
+get results 
+
+```{r}
+summary_all_rqc(stackloss_model_list)
+```
+
+## state_x77 Example
+
+Build data
 
 ```{r}
 state_x77 <-  as.data.frame(state.x77)  
 names(state_x77) <- c("population","income","illiteracy","life_exp","murder","hs_grad","frost","area" )
+```
 
+Make list of models. Initial data contains six variables. Base model two variables. We require a model up to four vatiables
 
-result <- make_best_model_list (
+```{r}
+state_x77_model_list <- make_best_model_list (
   formula = life_exp~population+income+illiteracy+murder+hs_grad+frost+area,
-  formula_base = life_exp~1, 
+  formula_base = life_exp~murder+illiteracy, 
   formula_null = life_exp~1, 
   data = state_x77, 
-  n_var = 5,
+  n_var = 4,
   tau = .5, method = "fn",
   mc.cores = 1)
 ```
 
 
-```{r}
-unlist(multi_ratio_rho (model_list = result[[1]]$fm_all, fm_base = rq(life_exp~1, data = state_x77, tau = .5, method = "fn")))
+Results for a given number of variables
 
-best_mod <- best_model(result[[1]]$fm_all, fm_base = rq(life_exp~1, data = state_x77, tau = .5, method = "fn"))
-make_formula_list (result[[1]]$fm_all)
-debugonce(best_model)
-
-  
-summary_single_rqc (i = 1, rqc = result)
-  
-unlist(multi_ratio_rho (model_list = result[[2]]$fm_all, fm_base = rq(life_exp ~ 1 + murder, data = state_x77, tau = .5, method = "fn")))
-summary_single_rqc (i = 2, rqc = result)
-summary_single_rqc (i = 3, rqc = result)
-
-
-summary_single_rqc (i = 1, rqc = result, exclude_var = "formula_best")
-summary_single_rqc (i = 1, rqc = result, exclude_var = c("formula_best", "formula_null" ))
-
-summary_single_rqc (i = 4, rqc = result, exclude_var = "formula_best", best_only = T)
-
-```
 
 ```{r}
-summary_all_rqc (rqc = result, exclude_var = c("formula_best", "formula_null"))
-summary_all_rqc (rqc = result, exclude_var = c("formula_best", "best_model", "formula_null"), best_only = T, digits = 4)
-summary_all_rqc (rqc = result, exclude_var = c("formula_best", "best_model", "formula_null"), best_only = T, digits = 4)
+summary_single_rqc (i = 2, rqc = state_x77_model_list)
 ```
+
+Results for all variables
+
+```{r}
+summary_all_rqc (rqc = state_x77_model_list, exclude_var = c("formula_best", "formula_null"))
+summary_all_rqc (rqc = state_x77_model_list, exclude_var = c("formula_best", "best_model", "formula_null"), best_only = F, digits = 4)
+summary_all_rqc (rqc = state_x77_model_list, exclude_var = c("formula_best", "best_model", "formula_null"), best_only = T, digits = 4)
+```
+
+
+## Plot 
+
+Fit the model with all possible variables 
+
+```{r}
+state_x77_model_list <- make_best_model_list (
+  formula = life_exp~population+income+illiteracy+murder+hs_grad+frost+area,
+  formula_base = life_exp~1, 
+  formula_null = life_exp~1, 
+  data = state_x77, 
+  tau = .5, method = "fn",
+  mc.cores = 1)
+```
+
+
+
+```{r}
+summary <- summary_all_rqc (rqc = state_x77_model_list, best_only = TRUE, digits = 7)
+
+
+p_null <- ggplot(summary ) + 
+  geom_line(aes(n_model_var, ratio_rho_null) , col = "darkblue") + 
+  geom_point(aes(n_model_var, ratio_rho_null), col = "darkgray", size  = 3)  +
+  xlab("Number of variables in model") + ylab("Ratio Rho of NULL model") 
+  
+
+p_base <- ggplot(summary ) + 
+  geom_line(aes(n_model_var, ratio_rho_base) , col = "darkgreen") + 
+  geom_point(aes(n_model_var, ratio_rho_base), col = "darkorange", size  = 3) +
+  xlab("Number of variables in model") + ylab("Ratio Rho of base model") 
+
+grid.arrange(p_null, p_base, ncol = 2)
+```
+
+
+
 
 
 
