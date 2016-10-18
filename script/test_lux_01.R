@@ -65,9 +65,15 @@ for ( i in 1:14){
 fl
 
 f1 <- train_total_gross_value ~ train_purchase_max + train_purchases_count + marriedcouple_family_own_children_under_18_years
+
+
+
 f2 <- train_total_gross_value ~ train_purchase_max + train_purchases_count + avg_male_education
 
+
 fm1 <- rq(f1, data = df, tau = .5, method = 'fn')
+class(fm1$formula)
+
 fm2 <- rq(f2, data = df, tau = .5, method = 'fn')
 
 fm1$rho
