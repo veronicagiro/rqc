@@ -1,5 +1,17 @@
-
-
+#' @title try rq model and if error returns NULL
+#' @importFrom quantreg rq
+#' @examples
+#' df <- data.frame(x = rep(1, 100), y = rnorm(100))
+#' fm <- try(rq_try(y~x , data = df))
+#' class(fm)
+#' @export
+rq_try <- function(..., silent = TRUE){
+  out <- try(rq(...), silent = silent)
+  if (class(out) == "try-error"){
+    out <- NULL
+  }
+  out
+}
 #################################
 #' @title names as char of lhs variables in formula
 #' @importFrom lazyeval f_lhs
@@ -126,11 +138,9 @@ make_model_list <- function(formula, fm_base , data, mc.cores , ...){
   # list of formulas
   formula_list <- unlist(lapply(response, paste, rs_formula_list, sep = "~"))
 
-  #test
-  #fl <<- formula_list
 
   # list of models
-  model_list <- mclapply(formula_list, rq, data=data , mc.cores = mc.cores, ...)
+  model_list <- mclapply(formula_list, rq_try, data=data , mc.cores = mc.cores, ...)
 
   #return
   return(model_list)

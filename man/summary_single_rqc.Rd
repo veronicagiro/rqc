@@ -4,6 +4,6 @@
 \alias{summary_single_rqc}
 \title{return summary statistcs for single level rqc}
 \usage{
-summary_single_rqc(i, rqc, best_only = F, exclude_var = NULL)
+summary_single_rqc(i, rqc, best_only = F, exclude_var = NULL, digits = 3)
 }
 

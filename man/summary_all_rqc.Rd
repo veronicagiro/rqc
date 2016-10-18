@@ -4,6 +4,6 @@
 \alias{summary_all_rqc}
 \title{return summary statistcs for multi level rqc}
 \usage{
-summary_all_rqc(rqc)
+summary_all_rqc(rqc, ...)
 }
 

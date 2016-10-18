@@ -4,7 +4,7 @@
 \alias{make_best_model_list}
 \title{nakes list of models with best selection}
 \usage{
-make_best_model_list(formula, formula_base, data, n_rec = -1, n_var = NULL,
-  mc.cores = 1, ...)
+make_best_model_list(formula, formula_base, formula_null, data, n_rec = -1,
+  n_var = NULL, mc.cores = 1, ...)
 }
 
