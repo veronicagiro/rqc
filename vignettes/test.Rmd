@@ -28,10 +28,11 @@ Build model list from formula
 
 ```{r}
 fm_b <- rq(stack.loss~1, data = stackloss, tau = .5, method = "fn")
+
 mod_lst <- make_model_list (formula =  stack.loss~Air.Flow+Water.Temp+ Acid.Conc.,
                               fm_base = fm_b,
                               data = stackloss, tau = .5, method = "fn", mc.cores = 1)
-
+# modello base + 1 spiegare
                  
 ```
 
@@ -55,7 +56,7 @@ frm(fm_best)
 ```
 
 
-Fit all models up to three variables starting from a univariate model
+Fit all models up to three variables (default case)  starting from a univariate model
 
 ```{r}
 stackloss_model_list <- make_best_model_list (
@@ -107,9 +108,42 @@ Results for all variables
 
 ```{r}
 summary_all_rqc (rqc = state_x77_model_list, exclude_var = c("formula_best", "formula_null"))
-summary_all_rqc (rqc = state_x77_model_list, exclude_var = c("formula_best", "best_model", "formula_null"), best_only = F, digits = 4)
-summary_all_rqc (rqc = state_x77_model_list, exclude_var = c("formula_best", "best_model", "formula_null"), best_only = T, digits = 4)
+summary_all_rqc (rqc = state_x77_model_list, exclude_var = c("formula_best", "best_model", "formula_null", "ratio_rho_base"), best_only = F, digits = 4)
+summary_all_rqc (rqc = state_x77_model_list, exclude_var = c("formula_best", "best_model", "formula_null", "ratio_rho_base"), best_only = T, digits = 4)
 ```
+
+## state_x77 Mau Example
+
+```{r}
+state_x77_model_list <- make_best_model_list (
+  formula = life_exp~population+income+illiteracy+murder+hs_grad+frost+area,
+  formula_base = life_exp~1, 
+  formula_null = life_exp~1, 
+  data = state_x77, 
+  n_var = 1,
+  tau = .5, method = "fn",
+  mc.cores = 1)
+```
+
+```{r}
+make_formula_list(state_x77_model_list[[1]]$fm_all)
+```
+
+decido per il income
+
+state_x77_model_list <- make_best_model_list (
+  formula = life_exp~population+income+illiteracy+murder+hs_grad+frost+area,
+  formula_base = life_exp~income, 
+  formula_null = life_exp~1, 
+  data = state_x77, 
+  n_var = 2,
+  tau = .5, method = "fn",
+  mc.cores = 1)
+
+```{r}
+make_formula_list(state_x77_model_list[[1]]$fm_all)
+```
+
 
 
 ## Plot 
