@@ -6,7 +6,7 @@ Authors@R: c(
       person("Maurizio", "Sanarico", email = "maurizio.sanarico@sdggroup.com", role = c('aut')))
 Description: Quasi stepwise model selection for quantile regression models.
 Depends:
-    R (>= 3.222222222222.0)
+    R (>= 3.2.0)
 License: GPL
 Encoding: UTF-8
 LazyData: true
