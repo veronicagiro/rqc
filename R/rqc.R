@@ -30,7 +30,7 @@ frm <- function(fm){
 #' @title extract formula from a rq object as character
 #' @export
 frm_char <- function(fm){
- deparse(frm(fm))
+ Reduce(paste, deparse(frm(fm)))
 }
 ################################
 #' @title extract rho from a rq object
@@ -78,7 +78,7 @@ best_model <- function(model_list, fm_base) {
 
   ratio_rho_list <- unlist(multi_ratio_rho(model_list, fm_base))
 
-  position_max_ratio_rho <- which(ratio_rho_list == max(ratio_rho_list))
+  position_max_ratio_rho <- which(ratio_rho_list == max(ratio_rho_list)) #possibly add [1]
   #position_max_ratio_rho <- Position(max, unlist(ratio_rho_list))
 
   best_model <- model_list[[position_max_ratio_rho]]
@@ -125,6 +125,9 @@ make_model_list <- function(formula, fm_base , data, mc.cores , ...){
 
   # list of formulas
   formula_list <- unlist(lapply(response, paste, rs_formula_list, sep = "~"))
+
+  #test
+  #fl <<- formula_list
 
   # list of models
   model_list <- mclapply(formula_list, rq, data=data , mc.cores = mc.cores, ...)
@@ -204,6 +207,7 @@ make_best_model_list <- function(formula, formula_base, formula_null, data , n_r
   # looping
   while(n_start < n_var){
 
+  #  cat("n_var = ", n_var, "\n")
     fm_best <- best_model (model_list = fm_all, fm_base = fm_base)
 
     out[[i]] <- list(fm_all = fm_all, fm_best = fm_best, fm_base = fm_base, fm_null = fm_null)
