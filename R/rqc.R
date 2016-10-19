@@ -37,6 +37,7 @@ f_rhs_n <- function(formula){
 #' @export
 frm <- function(fm){
   as.formula(fm$formula)
+  #fm$formula
 }
 ################################
 #' @title extract formula from a rq object as character
