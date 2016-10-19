@@ -48,7 +48,7 @@ frm_char <- function(fm){
 #' @title extract rho from a rq object
 #' @export
 rho <- function(fm){
-  fm$rho
+  fm$rho+runif(1)
 }
 #################################
 #' @title compute ratio_tho given two nested models
