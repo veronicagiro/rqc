@@ -88,10 +88,10 @@ Make list of models. Initial data contains six variables. Base model two variabl
 ```{r}
 state_x77_model_list <- make_best_model_list (
   formula = life_exp~population+income+illiteracy+murder+hs_grad+frost+area,
-  formula_base = life_exp~murder+illiteracy, 
+  formula_base = life_exp~1, #murder+illiteracy, 
   formula_null = life_exp~1, 
   data = state_x77, 
-  n_var = 4,
+  n_var = 7,
   tau = .5, method = "fn",
   mc.cores = 1)
 ```
@@ -102,11 +102,13 @@ Results for a given number of variables
 
 ```{r}
 summary_single_rqc (i = 2, rqc = state_x77_model_list)
+
 ```
 
 Results for all variables
 
 ```{r}
+test <- summary_all_rqc (rqc = state_x77_model_list)
 summary_all_rqc (rqc = state_x77_model_list, exclude_var = c("formula_best", "formula_null"))
 summary_all_rqc (rqc = state_x77_model_list, exclude_var = c("formula_best", "best_model", "formula_null", "ratio_rho_base"), best_only = F, digits = 4)
 summary_all_rqc (rqc = state_x77_model_list, exclude_var = c("formula_best", "best_model", "formula_null", "ratio_rho_base"), best_only = T, digits = 4)

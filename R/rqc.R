@@ -90,7 +90,7 @@ best_model <- function(model_list, fm_base) {
 
   ratio_rho_list <- unlist(multi_ratio_rho(model_list, fm_base))
 
-  position_max_ratio_rho <- which(ratio_rho_list == max(ratio_rho_list))[1] # too big problem require solution
+  position_max_ratio_rho <- which(ratio_rho_list == max(ratio_rho_list)) ##[1] # too big problem require solution
   #position_max_ratio_rho <- Position(max, unlist(ratio_rho_list))
 
   best_model <- model_list[[position_max_ratio_rho]]
