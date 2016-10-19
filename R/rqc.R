@@ -142,6 +142,9 @@ make_model_list <- function(formula, fm_base , data, mc.cores , ...){
   # list of models
   model_list <- mclapply(formula_list, rq_try, data=data , mc.cores = mc.cores, ...)
 
+  # remove NULL models
+  model_list <- model_list[!sapply(model_list, is.null)]
+
   #return
   return(model_list)
 
